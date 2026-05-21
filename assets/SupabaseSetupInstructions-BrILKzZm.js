@@ -1,4 +1,4 @@
-import{_ as e,g as t,m as n,o as r,p as i,r as a,t as o,v as s}from"./index-BFUz6HvT.js";var c=i(`Copy`,[[`rect`,{width:`14`,height:`14`,x:`8`,y:`8`,rx:`2`,ry:`2`,key:`17jyea`}],[`path`,{d:`M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2`,key:`zix9uf`}]]),l=s(e(),1),u=t();function d(){let[e,t]=(0,l.useState)(!1),[i,s]=(0,l.useState)(!1),[d,f]=(0,l.useState)(null),p=n.isOnline(),m=`-- JUSTIFLOW IN: DATABASE SEEDING SCHEMA
+import{_ as e,g as t,m as n,o as r,p as i,r as a,t as o,v as s}from"./index-B2OrYw3Z.js";var c=i(`Copy`,[[`rect`,{width:`14`,height:`14`,x:`8`,y:`8`,rx:`2`,ry:`2`,key:`17jyea`}],[`path`,{d:`M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2`,key:`zix9uf`}]]),l=s(e(),1),u=t();function d(){let[e,t]=(0,l.useState)(!1),[i,s]=(0,l.useState)(!1),[d,f]=(0,l.useState)(null),p=n.isOnline(),m=`-- JUSTIFLOW IN: DATABASE SEEDING SCHEMA
 -- Copy and paste this directly in your Supabase SQL Editor
 
 -- 1. Create Users Table

@@ -1,16 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { dbService } from './utilities/dbService';
 import LandingPage from './pages/LandingPage';
 import Login from './pages/Login';
-import Dashboard from './pages/Dashboard';
-import CaseDirectory from './pages/CaseDirectory';
-import HearingCalendar from './pages/HearingCalendar';
-import DocumentVault from './pages/DocumentVault';
-import TransparencyPortal from './pages/TransparencyPortal';
-import NJDGAnalytics from './pages/NJDGAnalytics';
-import AdminControls from './pages/AdminControls';
-import SupabaseSetupInstructions from './pages/SupabaseSetupInstructions';
-import { Scale, LogOut, LayoutDashboard, Briefcase, Calendar, ShieldCheck, Compass, BarChart3, Settings, Database, User, X, CheckCircle2, ShieldAlert } from 'lucide-react';
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const CaseDirectory = lazy(() => import('./pages/CaseDirectory'));
+const HearingCalendar = lazy(() => import('./pages/HearingCalendar'));
+const DocumentVault = lazy(() => import('./pages/DocumentVault'));
+const TransparencyPortal = lazy(() => import('./pages/TransparencyPortal'));
+const NJDGAnalytics = lazy(() => import('./pages/NJDGAnalytics'));
+const AdminControls = lazy(() => import('./pages/AdminControls'));
+const SupabaseSetupInstructions = lazy(() => import('./pages/SupabaseSetupInstructions'));
+import { Scale, LogOut, LayoutDashboard, Briefcase, Calendar, ShieldCheck, Compass, BarChart3, Settings, Database, User, X, CheckCircle2, ShieldAlert, Sun, Moon } from 'lucide-react';
 
 export default function App() {
   // Theme state
@@ -48,6 +49,13 @@ export default function App() {
   const [uploadForm, setUploadForm] = useState({ caseId: '', type: 'Vakalatnama', fileName: '' });
   const [challanForm, setChallanForm] = useState({ caseId: '', amount: '1500', cardNumber: '', expiry: '', cvv: '' });
   const [challanSuccess, setChallanSuccess] = useState(false);
+
+  // Toast notification
+  const [toast, setToast] = useState(null);
+  const showToast = (message, tone = 'success') => {
+    setToast({ message, tone });
+    setTimeout(() => setToast(null), 2800);
+  };
 
   // Sync state on load
   useEffect(() => {
@@ -128,8 +136,10 @@ export default function App() {
       setCases([created, ...cases]);
       setShowNewCaseModal(false);
       setNewCaseForm({ title: '', type: 'Civil (CPC)', priority: 'Routine' });
+      showToast(`Case registered • CNR ${created.cnr || generatedCNR}`);
     } catch (err) {
       console.error(err);
+      showToast('Could not register case', 'error');
     }
   };
 
@@ -162,8 +172,10 @@ export default function App() {
       setHearings([...hearings, created]);
       setShowHearingModal(false);
       setNewHearingForm({ caseId: '', date: '', time: '10:00 AM', room: 'Court Hall 1', type: 'Hearing', stage: 'Hearing' });
+      showToast('Hearing logged in master registry');
     } catch (err) {
       console.error(err);
+      showToast('Could not schedule hearing', 'error');
     }
   };
 
@@ -171,8 +183,10 @@ export default function App() {
     try {
       const created = await dbService.createDocument(newDoc);
       setDocuments([created, ...documents]);
+      showToast('Document uploaded • Pending verification');
     } catch (err) {
       console.error(err);
+      showToast('Upload failed', 'error');
     }
   };
 
@@ -183,6 +197,7 @@ export default function App() {
       setChallanSuccess(false);
       setShowChallanModal(false);
       setChallanForm({ caseId: '', amount: '1500', cardNumber: '', expiry: '', cvv: '' });
+      showToast('e-Challan paid • Receipt sent to registry');
     }, 2500);
   };
 
@@ -389,9 +404,21 @@ export default function App() {
           <div className="flex items-center gap-4">
             <button
               onClick={toggleDarkMode}
-              className="p-2 rounded-xl text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              className="p-2 rounded-xl text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+              aria-label="Toggle dark mode"
             >
-              {isDarkMode ? <span className="text-xs font-bold">☀️ Light</span> : <span className="text-xs font-bold">🌙 Dark</span>}
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.span
+                  key={isDarkMode ? 'sun' : 'moon'}
+                  initial={{ rotate: -90, opacity: 0 }}
+                  animate={{ rotate: 0, opacity: 1 }}
+                  exit={{ rotate: 90, opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="inline-flex items-center gap-1.5 text-xs font-bold"
+                >
+                  {isDarkMode ? (<><Sun className="h-3.5 w-3.5" /> Light</>) : (<><Moon className="h-3.5 w-3.5" /> Dark</>)}
+                </motion.span>
+              </AnimatePresence>
             </button>
             <button
               onClick={() => {
@@ -407,15 +434,44 @@ export default function App() {
 
         {/* Content Viewport */}
         <main className="flex-1 p-6 sm:p-8 overflow-y-auto">
-          {renderActivePage()}
+          <Suspense fallback={
+            <div className="flex items-center justify-center py-20 text-xs font-bold text-slate-400 uppercase tracking-widest">
+              <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse mr-2" />
+              Loading module...
+            </div>
+          }>
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={currentTab}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.2, ease: 'easeOut' }}
+              >
+                {renderActivePage()}
+              </motion.div>
+            </AnimatePresence>
+          </Suspense>
         </main>
 
       </div>
 
       {/* --- 1. MODAL: REGISTER NEW CASE --- */}
-      {showNewCaseModal && (
-        <div className="fixed inset-0 bg-slate-950/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl relative">
+      <AnimatePresence>{showNewCaseModal && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          className="fixed inset-0 bg-slate-950/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+        >
+          <motion.div
+            initial={{ scale: 0.92, y: 20, opacity: 0 }}
+            animate={{ scale: 1, y: 0, opacity: 1 }}
+            exit={{ scale: 0.92, y: 20, opacity: 0 }}
+            transition={{ type: 'spring', stiffness: 280, damping: 24 }}
+            className="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl relative"
+          >
             <button onClick={() => setShowNewCaseModal(false)} className="absolute right-6 top-6 p-2 rounded-xl text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-850"><X className="h-4 w-4" /></button>
             
             <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
@@ -470,14 +526,26 @@ export default function App() {
                 Issue CNR and Register Docket
               </button>
             </form>
-          </div>
-        </div>
-      )}
+          </motion.div>
+        </motion.div>
+      )}</AnimatePresence>
 
       {/* --- 2. MODAL: SCHEDULE HEARING --- */}
-      {showHearingModal && (
-        <div className="fixed inset-0 bg-slate-950/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl relative">
+      <AnimatePresence>{showHearingModal && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          className="fixed inset-0 bg-slate-950/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+        >
+          <motion.div
+            initial={{ scale: 0.92, y: 20, opacity: 0 }}
+            animate={{ scale: 1, y: 0, opacity: 1 }}
+            exit={{ scale: 0.92, y: 20, opacity: 0 }}
+            transition={{ type: 'spring', stiffness: 280, damping: 24 }}
+            className="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl relative"
+          >
             <button onClick={() => setShowHearingModal(false)} className="absolute right-6 top-6 p-2 rounded-xl text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-850"><X className="h-4 w-4" /></button>
             
             <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
@@ -559,14 +627,26 @@ export default function App() {
                 Log Hearing in Master Registry
               </button>
             </form>
-          </div>
-        </div>
-      )}
+          </motion.div>
+        </motion.div>
+      )}</AnimatePresence>
 
       {/* --- 3. MODAL: UPLOAD FILE --- */}
-      {showUploadModal && (
-        <div className="fixed inset-0 bg-slate-950/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl relative">
+      <AnimatePresence>{showUploadModal && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          className="fixed inset-0 bg-slate-950/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+        >
+          <motion.div
+            initial={{ scale: 0.92, y: 20, opacity: 0 }}
+            animate={{ scale: 1, y: 0, opacity: 1 }}
+            exit={{ scale: 0.92, y: 20, opacity: 0 }}
+            transition={{ type: 'spring', stiffness: 280, damping: 24 }}
+            className="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl relative"
+          >
             <button onClick={() => setShowUploadModal(false)} className="absolute right-6 top-6 p-2 rounded-xl text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-850"><X className="h-4 w-4" /></button>
             
             <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
@@ -637,14 +717,26 @@ export default function App() {
                 Upload File
               </button>
             </form>
-          </div>
-        </div>
-      )}
+          </motion.div>
+        </motion.div>
+      )}</AnimatePresence>
 
       {/* --- 4. MODAL: E-CHALLAN PAYMENT --- */}
-      {showChallanModal && (
-        <div className="fixed inset-0 bg-slate-950/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl relative">
+      <AnimatePresence>{showChallanModal && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          className="fixed inset-0 bg-slate-950/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+        >
+          <motion.div
+            initial={{ scale: 0.92, y: 20, opacity: 0 }}
+            animate={{ scale: 1, y: 0, opacity: 1 }}
+            exit={{ scale: 0.92, y: 20, opacity: 0 }}
+            transition={{ type: 'spring', stiffness: 280, damping: 24 }}
+            className="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl relative"
+          >
             <button onClick={() => setShowChallanModal(false)} className="absolute right-6 top-6 p-2 rounded-xl text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-850"><X className="h-4 w-4" /></button>
             
             <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
@@ -730,9 +822,35 @@ export default function App() {
                 {challanSuccess ? 'Processing e-Challan...' : 'Pay ₹1,500 Court Fee'}
               </button>
             </form>
-          </div>
-        </div>
-      )}
+          </motion.div>
+        </motion.div>
+      )}</AnimatePresence>
+
+      {/* --- TOAST NOTIFICATIONS --- */}
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            initial={{ opacity: 0, y: 40, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.95 }}
+            transition={{ type: 'spring', stiffness: 320, damping: 26 }}
+            className="fixed bottom-6 right-6 z-[60] max-w-sm"
+          >
+            <div className={`flex items-center gap-3 px-5 py-4 rounded-2xl shadow-2xl border backdrop-blur-md ${
+              toast.tone === 'error'
+                ? 'bg-red-50/95 dark:bg-red-950/80 border-red-200 dark:border-red-900 text-red-800 dark:text-red-200'
+                : 'bg-emerald-50/95 dark:bg-emerald-950/80 border-emerald-200 dark:border-emerald-900 text-emerald-800 dark:text-emerald-200'
+            }`}>
+              {toast.tone === 'error' ? (
+                <ShieldAlert className="h-5 w-5 shrink-0" />
+              ) : (
+                <CheckCircle2 className="h-5 w-5 shrink-0" />
+              )}
+              <p className="text-xs font-bold">{toast.message}</p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
     </div>
   );

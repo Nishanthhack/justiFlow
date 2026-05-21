@@ -1,5 +1,16 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import { Briefcase, Clock, Activity, Users, AlertTriangle, FileSignature, CreditCard, Shield, Gavel, Calendar, CheckCircle2, ChevronRight, Wand2 } from 'lucide-react';
+
+const gridContainerVariants = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.08, delayChildren: 0.05 } }
+};
+
+const cardItemVariants = {
+  hidden: { opacity: 0, y: 16 },
+  show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 140, damping: 18 } }
+};
 
 export default function Dashboard({ currentUser, cases, hearings, documents, onSwitchTab, onOpenOptimizer, onOpenNewCase, onOpenUpload, onOpenEChallan }) {
   const role = currentUser.role;
@@ -19,7 +30,11 @@ export default function Dashboard({ currentUser, cases, hearings, documents, onS
   const userHearings = hearings.filter(h => userCases.some(c => c.id === h.caseId));
 
   const StatCard = ({ title, value, icon, trend, trendColor = 'text-indigo-600 dark:text-indigo-400', bgClass = 'bg-indigo-50 dark:bg-indigo-950/40' }) => (
-    <div className="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/80 rounded-2xl p-6 shadow-sm flex flex-col justify-between">
+    <motion.div
+      variants={cardItemVariants}
+      whileHover={{ y: -4, transition: { duration: 0.2 } }}
+      className="bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/80 rounded-2xl p-6 shadow-sm flex flex-col justify-between"
+    >
       <div className="flex justify-between items-start">
         <div>
           <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">{title}</p>
@@ -30,7 +45,7 @@ export default function Dashboard({ currentUser, cases, hearings, documents, onS
         </div>
       </div>
       {trend && <div className="mt-4 text-xs font-semibold text-slate-500 dark:text-slate-400 flex items-center gap-1.5">{trend}</div>}
-    </div>
+    </motion.div>
   );
 
   const HeaderBanner = () => (
@@ -87,12 +102,17 @@ export default function Dashboard({ currentUser, cases, hearings, documents, onS
     return (
       <div className="space-y-6">
         <HeaderBanner />
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <motion.div
+          variants={gridContainerVariants}
+          initial="hidden"
+          animate="show"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
+        >
           <StatCard title="Total Pendency" value={`${cases.length} Cases`} icon={<Briefcase className="h-5 w-5 text-indigo-600" />} trend="Synced with National Grid" />
           <StatCard title="Adjournment Rate" value="14.2%" icon={<Clock className="h-5 w-5 text-red-600" />} trend="Target limit: < 5.0%" bgClass="bg-red-50 dark:bg-red-950/30" />
           <StatCard title="Avg Disposal Time" value="420 Days" icon={<CheckCircle2 className="h-5 w-5 text-emerald-600" />} trend="-15 Days last month" bgClass="bg-emerald-50 dark:bg-emerald-950/30" />
           <StatCard title="Judge Allocation" value="98%" icon={<Users className="h-5 w-5 text-blue-600" />} trend="17 Active High Court Benches" bgClass="bg-blue-50 dark:bg-blue-950/30" />
-        </div>
+        </motion.div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Chart area */}
@@ -154,12 +174,17 @@ export default function Dashboard({ currentUser, cases, hearings, documents, onS
           </button>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <motion.div
+          variants={gridContainerVariants}
+          initial="hidden"
+          animate="show"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
+        >
           <StatCard title="Active Docket" value={`${activeCases.length} Cases`} icon={<Gavel className="h-5 w-5 text-indigo-600" />} />
           <StatCard title="Disposal Yield" value="84%" icon={<CheckCircle2 className="h-5 w-5 text-emerald-600" />} trend="+4% this quarter" bgClass="bg-emerald-50 dark:bg-emerald-950/30" />
           <StatCard title="Allowed Adjournments" value="2" icon={<Clock className="h-5 w-5 text-amber-600" />} trend="Limit: Max 3 per case" bgClass="bg-amber-50 dark:bg-amber-950/30" />
           <StatCard title="Active Injunctions" value="5" icon={<Shield className="h-5 w-5 text-blue-600" />} trend="Article 226/32 trials" bgClass="bg-blue-50 dark:bg-blue-950/30" />
-        </div>
+        </motion.div>
 
         <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/60 dark:border-slate-800/80 shadow-sm overflow-hidden">
           <div className="p-6 border-b border-slate-100 dark:border-slate-850 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/50">
@@ -238,12 +263,17 @@ export default function Dashboard({ currentUser, cases, hearings, documents, onS
           </button>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <motion.div
+          variants={gridContainerVariants}
+          initial="hidden"
+          animate="show"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
+        >
           <StatCard title="Pending Vakalatnama" value="8 Files" icon={<FileSignature className="h-5 w-5 text-amber-600" />} bgClass="bg-amber-50 dark:bg-amber-950/30" />
           <StatCard title="Registry Fees Collected" value="₹45,200" icon={<CreditCard className="h-5 w-5 text-emerald-600" />} bgClass="bg-emerald-50 dark:bg-emerald-950/30" />
           <StatCard title="Summons to Issue" value="12 Orders" icon={<Gavel className="h-5 w-5 text-blue-600" />} bgClass="bg-blue-50 dark:bg-blue-950/30" />
           <StatCard title="Bail Bonds Audited" value="3 Files" icon={<Shield className="h-5 w-5 text-purple-600" />} bgClass="bg-purple-50 dark:bg-purple-950/30" />
-        </div>
+        </motion.div>
 
         <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/60 dark:border-slate-800/80 p-6 shadow-sm">
           <h3 className="font-extrabold text-slate-900 dark:text-white mb-6 flex items-center gap-2">
@@ -297,10 +327,15 @@ export default function Dashboard({ currentUser, cases, hearings, documents, onS
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <motion.div
+              variants={gridContainerVariants}
+              initial="hidden"
+              animate="show"
+              className="grid grid-cols-1 sm:grid-cols-2 gap-4"
+            >
               <StatCard title="Active Briefs" value={`${activeCases.length} Cases`} icon={<Briefcase className="h-5 w-5 text-indigo-600" />} />
               <StatCard title="Next Hearing Appearances" value={`${userHearings.length} Dates`} icon={<Calendar className="h-5 w-5 text-blue-600" />} bgClass="bg-blue-50 dark:bg-blue-950/30" />
-            </div>
+            </motion.div>
 
             <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/60 dark:border-slate-800/80 p-6 shadow-sm">
               <h3 className="font-extrabold text-slate-900 dark:text-white mb-6 flex items-center gap-2">

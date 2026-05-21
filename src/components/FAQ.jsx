@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Minus } from 'lucide-react';
+import { Plus } from 'lucide-react';
 
 export default function FAQ() {
   const faqs = [
@@ -57,14 +57,16 @@ export default function FAQ() {
               >
                 <button
                   onClick={() => toggle(idx)}
-                  className="w-full flex items-center justify-between p-6 text-left font-bold text-slate-900 dark:text-white hover:bg-slate-100/50 dark:hover:bg-slate-900/50 transition-colors"
+                  className="w-full flex items-center justify-between p-6 text-left font-bold text-slate-900 dark:text-white hover:bg-slate-100/50 dark:hover:bg-slate-900/50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-50 dark:focus-visible:ring-offset-slate-950"
                 >
                   <span className="pr-4">{faq.q}</span>
-                  {isOpen ? (
-                    <Minus className="h-5 w-5 text-indigo-600 shrink-0" />
-                  ) : (
-                    <Plus className="h-5 w-5 text-indigo-600 shrink-0" />
-                  )}
+                  <motion.span
+                    animate={{ rotate: isOpen ? 45 : 0 }}
+                    transition={{ duration: 0.2, ease: 'easeOut' }}
+                    className="shrink-0"
+                  >
+                    <Plus className="h-5 w-5 text-indigo-600" />
+                  </motion.span>
                 </button>
 
                 <AnimatePresence initial={false}>

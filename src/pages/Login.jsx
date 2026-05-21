@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { MOCK_USERS } from '../data/mockData';
 import { dbService } from '../utilities/dbService';
-import { Scale, Lock, Mail, ChevronRight, ArrowLeft, Database, ShieldAlert } from 'lucide-react';
+import { Scale, Lock, Mail, ChevronRight, ArrowLeft, Database, ShieldAlert, Loader2 } from 'lucide-react';
 
 export default function Login({ onLoginSuccess, onBackToLanding }) {
   const [email, setEmail] = useState('');
@@ -103,11 +104,19 @@ export default function Login({ onLoginSuccess, onBackToLanding }) {
           <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">Access judicial workflow registries and AI tools.</p>
 
           <form onSubmit={handleLogin} className="space-y-4">
-            {error && (
-              <div className="p-3.5 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 rounded-xl text-xs font-semibold text-red-700 dark:text-red-400">
-                {error}
-              </div>
-            )}
+            <AnimatePresence>
+              {error && (
+                <motion.div
+                  initial={{ opacity: 0, y: -8, height: 0 }}
+                  animate={{ opacity: 1, y: 0, height: 'auto' }}
+                  exit={{ opacity: 0, y: -8, height: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="p-3.5 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 rounded-xl text-xs font-semibold text-red-700 dark:text-red-400 overflow-hidden"
+                >
+                  {error}
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             <div>
               <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Email Address</label>
@@ -139,13 +148,22 @@ export default function Login({ onLoginSuccess, onBackToLanding }) {
               </div>
             </div>
 
-            <button
+            <motion.button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-600/55 text-white font-bold py-3 rounded-xl flex justify-center items-center gap-2 transition-all cursor-pointer shadow-lg shadow-indigo-600/10 hover:shadow-indigo-600/20"
+              whileTap={{ scale: 0.98 }}
+              className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-600/55 text-white font-bold py-3 rounded-xl flex justify-center items-center gap-2 transition-all cursor-pointer shadow-lg shadow-indigo-600/10 hover:shadow-indigo-600/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2"
             >
-              {isLoading ? 'Verifying Credentials...' : 'Secure Login'} <ChevronRight className="h-4 w-4" />
-            </button>
+              {isLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" /> Verifying Credentials...
+                </>
+              ) : (
+                <>
+                  Secure Login <ChevronRight className="h-4 w-4" />
+                </>
+              )}
+            </motion.button>
           </form>
 
           {/* Demo Roles */}

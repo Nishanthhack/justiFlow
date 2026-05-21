@@ -1,13 +1,19 @@
 import React, { useState } from 'react';
-import { Mail, Phone, MapPin, Send } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Mail, Phone, MapPin, Send, CheckCircle2, Loader2 } from 'lucide-react';
 
 export default function Contact() {
   const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' });
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    setSubmitted(true);
+    setIsSubmitting(true);
+    setTimeout(() => {
+      setIsSubmitting(false);
+      setSubmitted(true);
+    }, 900);
     setTimeout(() => {
       setForm({ name: '', email: '', subject: '', message: '' });
       setSubmitted(false);
@@ -120,19 +126,46 @@ export default function Contact() {
                 />
               </div>
 
-              <button
+              <motion.button
                 type="submit"
-                disabled={submitted}
-                className="w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 disabled:bg-emerald-600 rounded-xl shadow-lg shadow-indigo-600/10 transition-all cursor-pointer"
+                disabled={isSubmitting || submitted}
+                whileTap={{ scale: 0.98 }}
+                className="w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 disabled:bg-emerald-600 rounded-xl shadow-lg shadow-indigo-600/10 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2"
               >
-                {submitted ? (
-                  'Message Received! We will respond shortly.'
-                ) : (
-                  <>
-                    Send Message <Send className="h-4 w-4" />
-                  </>
-                )}
-              </button>
+                <AnimatePresence mode="wait" initial={false}>
+                  {submitted ? (
+                    <motion.span
+                      key="success"
+                      initial={{ opacity: 0, y: 6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -6 }}
+                      className="inline-flex items-center gap-2"
+                    >
+                      <CheckCircle2 className="h-4 w-4" /> Message Received! We will respond shortly.
+                    </motion.span>
+                  ) : isSubmitting ? (
+                    <motion.span
+                      key="loading"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="inline-flex items-center gap-2"
+                    >
+                      <Loader2 className="h-4 w-4 animate-spin" /> Sending...
+                    </motion.span>
+                  ) : (
+                    <motion.span
+                      key="idle"
+                      initial={{ opacity: 0, y: 6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -6 }}
+                      className="inline-flex items-center gap-2"
+                    >
+                      Send Message <Send className="h-4 w-4" />
+                    </motion.span>
+                  )}
+                </AnimatePresence>
+              </motion.button>
             </form>
           </div>
 

@@ -145,7 +145,13 @@ export default function Hero({ onLoginClick, currentUser, onDashboardClick }) {
                   <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">AI Case Insights</span>
                   <div className="space-y-2">
                     <div className="h-2 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
-                      <div className="h-full w-4/5 bg-indigo-600 rounded-full" />
+                      <motion.div
+                        initial={{ width: 0 }}
+                        whileInView={{ width: '80%' }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 1.2, delay: 0.4, ease: 'easeOut' }}
+                        className="h-full bg-indigo-600 rounded-full"
+                      />
                     </div>
                     <p className="text-[10px] text-slate-500">Case MHBO is classified as High Risk (85%) - Adjournment limit breached.</p>
                   </div>

@@ -3,3 +3,19 @@
 /* Enable class-based dark mode variant in Tailwind CSS v4 */
 @custom-variant dark (&:where(.dark, .dark *));
 
+/*
+ * Register the in-between color stops the source uses
+ * (slate-250 / 350 / 850, indigo-150 / 650 / 850).
+ * Without these, classes like `text-slate-350` produce NO CSS in Tailwind v4
+ * — which makes text and borders disappear in light/dark mode.
+ * Values are interpolated midpoints between the adjacent standard stops.
+ */
+@theme {
+  --color-slate-250: #d6dee8;
+  --color-slate-350: #afbccc;
+  --color-slate-850: #162032;
+
+  --color-indigo-150: #d3dcfe;
+  --color-indigo-650: #493fd7;
+  --color-indigo-850: #342f92;
+}
